@@ -1,7 +1,6 @@
 import { Component, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, Input } from '@angular/core';
 
 declare let H: any;
-
 @Component({
   selector: 'app-route',
   templateUrl: './route.component.html',
@@ -9,85 +8,115 @@ declare let H: any;
 })
 export class RouteComponent implements OnInit {
 
-  platform = new H.service.Platform({
-    'apikey': 'YJkYaLYfjrJd0KcdECnSLhHaX86cnYTjOyUd9FqPAv4'
-  });
-  map: any
-  defaultLayers;
-  bubble;
+  title = 'here-project';
+  private platform: any;
+
+  @ViewChild("map")
+  public mapElement: ElementRef;
+
+  @Input()
+  public appId: any;
+
+  @Input()
+  public appCode: any;
+
+  @Input()
+  public start: any;
+
+  @Input()
+  public finish: any;
+
+  @Input()
+  public width: any;
+
+  @Input()
+  public height: any;
+
+  public directions: any;
+
+  private map: any;
+  private router: any;
   ui;
-  // routeInstructionsContainer
-  constructor() {
-    this.calculateRouteFromAtoB(this.platform);
+  openBubble
+  routingMode
+  marker
+  group
+  coordinate
+  html
+  icon = new H.map.Icon('./../assets/img/marcadores-05.svg');
+  icon3 = '<svg  width="24" height="24" xmlns="http://www.w3.org/2000/svg">' +
+    '<rect stroke="black" fill="${FILL}" x="1" y="1" width="22" height="22" />' +
+    '<text x="12" y="18" font-size="12pt" font-family="Arial" font-weight="bold" ' +
+    'text-anchor="middle" fill="${STROKE}" >C</text></svg>';
+  icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
+  public constructor() {
+    this.platform = new H.service.Platform({
+      "apikey": "hwpesCIFlK4kf3OTS00AucCVEMuwSPZljuRvZtJVUdE"
+    });
+    this.routingMode = 'fast';
+    this.start = "1.2086258882443415,-77.28358656039275";
+    this.finish = "1.2068161609787038,-77.27432740193775";
+    this.directions = [];
+    this.router = this.platform.getRoutingService();
   }
 
-  ngOnInit(): void {
-    var mapContainer = document.getElementById('mapContainer'),
-      routeInstructionsContainer = document.getElementById('panel');
-    this.defaultLayers = this.platform.createDefaultLayers();
-    this.map = new H.Map(mapContainer,
-      this.defaultLayers.vector.normal.map,
+  public ngOnInit() { }
+
+  public ngAfterViewInit() {
+    let defaultLayers = this.platform.createDefaultLayers();
+    this.map = new H.Map(
+      this.mapElement.nativeElement,
+      defaultLayers.vector.normal.map,
       {
-        center: { lat: 52.5160, lng: 13.3779 },
-        zoom: 13,
+        zoom: 15,
+        center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
         pixelRatio: window.devicePixelRatio || 1
-      });
-    window.addEventListener('resize', () => this.map.getViewPort().resize());
-    let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
-    this.ui = H.ui.UI.createDefault(this.map, this.defaultLayers);
-
-    this.calculateRouteFromAtoB(this.platform);
-    this.onSuccess
-    this.onError
-
-  }
-
-  calculateRouteFromAtoB(platform) {
-    var router = platform.getRoutingService(null, 8),
-      routeRequestParams = {
-        routingMode: 'fast',
-        transportMode: 'car',
-        origin: '52.5160,13.3779', // Brandenburg Gate
-        destination: '52.5206,13.3862',  // Friedrichstraße Railway Station
-        return: 'polyline,turnByTurnActions,actions,instructions,travelSummary'
-      };
-
-
-    router.calculateRoute(
-      routeRequestParams,
-      this.onSuccess,
+      }
     );
+    var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
+    this.route(this.start, this.finish);
+    this.addInfoBubble(this.map);
   }
 
-  onSuccess(result) {
-    var route = result.routes[0];
-    console.log(route);
-    this.addRouteShapeToMap(route);
-    this.addManueversToMap(route);
-    this.addWaypointsToPanel(route);
-    this.addManueversToPanel(route);
-    this.addSummaryToPanel(route);
-  }
-
-  onError(error) {
-    alert('Can\'t reach the remote server');
-  }
-
-  openBubble(position, text) {
-    if (!this.bubble) {
-      this.bubble = new H.ui.InfoBubble(
-        position,
-        // The FO property holds the province name.
-        { content: text });
-      this.ui.addBubble(this.bubble);
-    } else {
-      this.bubble.setPosition(position);
-      this.bubble.setContent(text);
-      this.bubble.open();
+  public route(start: any, finish: any) {
+    let params = {
+      "mode": "fastest;car",
+      "waypoint0": "geo!" + this.start,
+      "waypoint1": "geo!" + this.finish,
+      "representation": "display"
     }
+    this.map.removeObjects(this.map.getObjects());
+    this.router.calculateRoute(params, data => {
+      if (data.response) {
+        this.directions = data.response.route[0].leg[0].maneuver;
+        data = data.response.route[0];
+        let lineString = new H.geo.LineString();
+        data.shape.forEach(point => {
+          let parts = point.split(",");
+          lineString.pushLatLngAlt(parts[0], parts[1]);
+        });
+        let routeLine = new H.map.Polyline(lineString, {
+          style: { strokeColor: "blue", lineWidth: 5 }
+        });
+
+        let startMarker = new H.map.Marker({
+          lat: this.start.split(",")[0],
+          lng: this.start.split(",")[1]
+        });
+        let finishMarker = new H.map.Marker({
+          lat: this.finish.split(",")[0],
+          lng: this.finish.split(",")[1]
+        }, { icon: this.icon2 });
+        this.map.addObjects([routeLine, startMarker, finishMarker]);
+        this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
+      }
+    }, error => {
+      console.error(error);
+    });
   }
 
-  addRouteShapeToMap(route) {
+  public addRouteShapeToMap(route) {
     route.sections.forEach((section) => {
       // decode LineString from the flexible polyline
       let linestring = H.geo.LineString.fromFlexiblePolyline(section.polyline);
@@ -109,110 +138,35 @@ export class RouteComponent implements OnInit {
     });
   }
 
-  addManueversToMap(route) {
-    var svgMarkup = '<svg width="18" height="18" ' +
-      'xmlns="http://www.w3.org/2000/svg">' +
-      '<circle cx="8" cy="8" r="8" ' +
-      'fill="#1b468d" stroke="white" stroke-width="1"  />' +
-      '</svg>',
-      dotIcon = new H.map.Icon(svgMarkup, { anchor: { x: 8, y: 8 } }),
-      group = new H.map.Group(),
-      i,
-      j;
-    route.sections.forEach((section) => {
-      let poly = H.geo.LineString.fromFlexiblePolyline(section.polyline).getLatLngAltArray();
+  public addMarkerToGroup(group, coordinate, html) {
 
-      let actions = section.actions;
-      // Add a marker for each maneuver
-      for (i = 0; i < actions.length; i += 1) {
-        let action = actions[i];
-        var marker = new H.map.Marker({
-          lat: poly[action.offset * 3],
-          lng: poly[action.offset * 3 + 1]
-        },
-          { icon: dotIcon });
-        marker.instruction = action.instruction;
-        group.addObject(marker);
-      }
-
-      group.addEventListener('tap', (evt) => {
-        this.map.setCenter(evt.target.getGeometry());
-        this.openBubble(
-          evt.target.getGeometry(), evt.target.instruction);
-      }, false);
-
-      // Add the maneuvers group to the map
-      this.map.addObject(group);
-    });
+    this.marker = new H.map.Marker(coordinate);
+    this.marker.setData(html);
+    this.group.addObject(this.marker);
   }
 
-  addWaypointsToPanel(route) {
-    var mapContainer = document.getElementById('mapContainer'),
-      routeInstructionsContainer = document.getElementById('panel');
-    var nodeH3 = document.createElement('h3'),
-      labels = [];
-
-    route.sections.forEach((section) => {
-      labels.push(
-        section.turnByTurnActions[0].nextRoad.name[0].value)
-      labels.push(
-        section.turnByTurnActions[section.turnByTurnActions.length - 1].currentRoad.name[0].value)
-    });
-
-    nodeH3.textContent = labels.join(' - ');
-    routeInstructionsContainer.innerHTML = '';
-    routeInstructionsContainer.appendChild(nodeH3);
-  }
-
-  addSummaryToPanel(route) {
-    let duration = 0,
-      distance = 0;
-
-    route.sections.forEach((section) => {
-      distance += section.travelSummary.length;
-      duration += section.travelSummary.duration;
-    });
-
-    var summaryDiv = document.createElement('div'),
-      content = '';
-    content += '<b>Total distance</b>: ' + distance + 'm. <br/>';
-    content += '<b>Travel Time</b>: (in current traffic)';
-
-
-    summaryDiv.style.fontSize = 'small';
-    summaryDiv.style.marginLeft = '5%';
-    summaryDiv.style.marginRight = '5%';
-    summaryDiv.innerHTML = content;
-    var mapContainer = document.getElementById('mapContainer'),
-      routeInstructionsContainer = document.getElementById('panel');
-    routeInstructionsContainer.appendChild(summaryDiv);
-  }
-
-  addManueversToPanel(route) {
-    var nodeOL = document.createElement('ol');
-
-    nodeOL.style.fontSize = 'small';
-    nodeOL.style.marginLeft = '5%';
-    nodeOL.style.marginRight = '5%';
-    nodeOL.className = 'directions';
-
-    route.sections.forEach((section) => {
-      section.actions.forEach((action, idx) => {
-        var li = document.createElement('li'),
-          spanArrow = document.createElement('span'),
-          spanInstruction = document.createElement('span');
-
-        spanArrow.className = 'arrow ' + (action.direction || '') + action.action;
-        spanInstruction.innerHTML = section.actions[idx].instruction;
-        li.appendChild(spanArrow);
-        li.appendChild(spanInstruction);
-
-        nodeOL.appendChild(li);
+  addInfoBubble(map) {
+    this.group = new H.map.Group();
+    map.addObject(this.group);
+    this.group.addEventListener('tap', (evt) => {
+      let bubble = new H.ui.InfoBubble(evt.target.getGeometry(), {
+        content: evt.target.getData()
       });
-    });
-    var mapContainer = document.getElementById('mapContainer'),
-      routeInstructionsContainer = document.getElementById('panel');
-    routeInstructionsContainer.appendChild(nodeOL);
+      this.ui.addBubble(bubble);
+    }, false);
 
+    this.addMarkerToGroup(this.group, { lat: 1.2086258882443415, lng: -77.28358656039275 },
+      '<div style="width: 12em;height: 9em;">' +
+      '<p style="margin-left: 30px;">7</p>' +
+      '<p style="font-size: 7px;margin-top: -20px;">entregas Completadas</p>' +
+      '<p style="margin-top: -3.5em;margin-left: 8.5em;">7</p>' +
+      '<p style="font-size: 7px;margin-top: -20px;margin-left: 13em;">entregas por hacer</p>' +
+      '<p style="margin-top: -10px;margin-left: 4em;">ASD798</p>' +
+      '<p style="margin-top: -10px;margin-left: 3em;s">Diego vallejo</p>' +
+      '<a href="http://localhost:4200/" class="btn btnMap" style=" border-radius: 10px;margin-left: 16px;letter-spacing: 0px; color: #FFFFFF; opacity: 1; height: 2em; padding-top: 0.5em; margin-top: 9px; padding-bottom: 0.5em; text-align: center; padding-left: 2em; padding-right: 2em; background: transparent linear-gradient(89deg, #FC6100 0%, #FFB100 100%) 0% 0% no-repeat padding-box !important;">pedido en ruta</a>' +
+      '</div>'
+    );
   }
+
 }
+

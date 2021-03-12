@@ -19,3 +19,20 @@
 .directions li span.arrive  {
   background-position:-1288px;
 }
+.H_ib_body{width: 168px !important;}
+.btnMap{
+  border-radius: 10px;
+    letter-spacing: 0px;
+    color: #FFFFFF;
+    opacity: 1;
+    height: 2em;
+    padding-top: 0.5em;
+    margin-top: 9px;
+    padding-bottom: 0.5em;
+    text-align: center;
+    padding-left: 2em;
+    padding-right: 2em;
+    background: transparent linear-gradient(
+89deg
+, #FC6100 0%, #FFB100 100%) 0% 0% no-repeat padding-box !important;
+}

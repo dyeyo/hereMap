@@ -9,12 +9,12 @@ declare var H: any;
 export class HereMapComponent implements OnInit {
 
   platform = new H.service.Platform({
-    'apikey': 'YJkYaLYfjrJd0KcdECnSLhHaX86cnYTjOyUd9FqPAv4'
+    'apikey': '23h0D8Ct5g8L-fXopb1Nh8Qt6YcJgOMMnRK93VTzERY'
   });
   map: any
   targetElement = document.getElementById('mapContainer');
   defaultLayers = this.platform.createDefaultLayers();
-
+  ui;
   constructor() { }
 
   ngOnInit(): void {
@@ -25,16 +25,18 @@ export class HereMapComponent implements OnInit {
         zoom: 15,
         center: { lat: 1.214405018383404, lng: -77.27922019835766 }
       });
+    window.addEventListener('resize', () => this.map.getViewPort().resize());
+    let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    this.ui = H.ui.UI.createDefault(this.map, this.defaultLayers);
 
-    let icon = new H.map.Icon('./../assets/img/marcadores-05.svg'),
+    // let icon = new H.map.Icon('./../assets/img/carritos-01.svg'),
+    //   coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
+    //   marker = new H.map.Marker(coords, { icon });
+    let icon = new H.map.Icon('./../assets/img/carritos-01.png'),
       coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
       marker = new H.map.Marker(coords, { icon });
-    let icon2 = new H.map.Icon('./../assets/img/marcadores-05.svg'),
-      coords2 = { lat: 1.2116539367839956, lng: -77.28388223378063 },
-      marker2 = new H.map.Marker(coords, { icon2 });
     // Add the marker to the map and center the map at the location of the marker:
-    this.map.addObject(marker, marker2);
-    this.map.setCenter(coords, coords2);
+    this.map.addObject(marker, marker);
   }
 
 }
