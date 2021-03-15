@@ -51,15 +51,80 @@ export class RouteComponent implements OnInit {
   html
   icons = new H.map.Icon('./../assets/img/marcadores-05.svg');
   icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
+  waypoints = [
+    {
+      "id": "BOGOTAINICIO",
+      "lat": 4.58728,
+      "lng": -74.10724,
+      "sequence": 0,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Bogota2",
+      "lat": 4.6031,
+      "lng": -74.12812,
+      "sequence": 1,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "PARQUENARIÑO",
+      "lat": 1.21485,
+      "lng": -77.27776,
+      "sequence": 2,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Catambuco",
+      "lat": 1.166264,
+      "lng": -77.299513,
+      "sequence": 3,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "BARRANQUILLA",
+      "lat": 10.96974,
+      "lng": -74.80494,
+      "sequence": 4,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Bogota1",
+      "lat": 4.61824,
+      "lng": -74.11027,
+      "sequence": 5,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "BOGOTAFIN",
+      "lat": 4.58728,
+      "lng": -74.10724,
+      "sequence": 6,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    }
+  ];
+
   public constructor() {
     this.platform = new H.service.Platform({
       "apikey": "hwpesCIFlK4kf3OTS00AucCVEMuwSPZljuRvZtJVUdE"
     });
-    this.routingMode = 'fast';
+
+    this.waypoints.forEach(item => console.log(`${item.lat},${item.lng}`));
+    this.routingMode = 'fastest;car';
     this.start = "1.2086258882443415,-77.28358656039275";
+    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
     this.mitad = "1.217051,-77.283424";
+    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
     this.prefin = "1.224967,-77.291535";
+    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
     this.finish = "1.2068161609787038,-77.27432740193775";
+    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
     this.directions = [];
     this.router = this.platform.getRoutingService();
   }
@@ -88,10 +153,10 @@ export class RouteComponent implements OnInit {
     let params =
     {
       "mode": "fastest;car",
-      "waypoint0": "geo!" + this.start,
-      "waypoint1": "geo!" + this.mitad,
-      "waypoint2": "geo!" + this.prefin,
-      "waypoint3": "geo!" + this.finish,
+      "waypoint0": this.start,
+      "waypoint1": this.mitad,
+      "waypoint2": this.prefin,
+      "waypoint3": this.finish,
       "representation": "display"
     }
     this.map.removeObjects(this.map.getObjects());
