@@ -24,6 +24,12 @@ export class RouteComponent implements OnInit {
   public start: any;
 
   @Input()
+  public mitad: any;
+
+  @Input()
+  public prefin: any;
+
+  @Input()
   public finish: any;
 
   @Input()
@@ -51,6 +57,8 @@ export class RouteComponent implements OnInit {
     });
     this.routingMode = 'fast';
     this.start = "1.2086258882443415,-77.28358656039275";
+    this.mitad = "1.217051,-77.283424";
+    this.prefin = "1.224967,-77.291535";
     this.finish = "1.2068161609787038,-77.27432740193775";
     this.directions = [];
     this.router = this.platform.getRoutingService();
@@ -77,24 +85,13 @@ export class RouteComponent implements OnInit {
   }
 
   public route(start: any, finish: any) {
-    // let lineString = new H.geo.LineString();
-
-    // lineString.pushPoint({ lat: 4.58728, lng: -74.10724 });
-    // lineString.pushPoint({ lat: 4.6031, lng: -74.12812 });
-    // lineString.pushPoint({ lat: 1.21485, lng: -77.27776 });
-    // lineString.pushPoint({ lat: 1.166264, lng: -77.299513 });
-    // lineString.pushPoint({ lat: 10.96974, lng: -74.80494 });
-    // lineString.pushPoint({ lat: 4.61824, lng: -74.11027 });
-    // lineString.pushPoint({ lat: 4.58728, lng: -74.10724 });
-
-    // this.map.addObject(new H.map.Polyline(
-    //   lineString, { style: { lineWidth: 4 } }
-    // ));
     let params =
     {
       "mode": "fastest;car",
       "waypoint0": "geo!" + this.start,
-      "waypoint1": "geo!" + this.finish,
+      "waypoint1": "geo!" + this.mitad,
+      "waypoint2": "geo!" + this.prefin,
+      "waypoint3": "geo!" + this.finish,
       "representation": "display"
     }
     this.map.removeObjects(this.map.getObjects());
@@ -114,11 +111,19 @@ export class RouteComponent implements OnInit {
           lat: this.start.split(",")[0],
           lng: this.start.split(",")[1]
         }, { icon: this.icon2 });
+        let medioMarker = new H.map.Marker({
+          lat: this.mitad.split(",")[0],
+          lng: this.mitad.split(",")[1]
+        }, { icon: this.icon2 });
+        let prefinishMarker = new H.map.Marker({
+          lat: this.prefin.split(",")[0],
+          lng: this.prefin.split(",")[1]
+        }, { icon: this.icons });
         let finishMarker = new H.map.Marker({
           lat: this.finish.split(",")[0],
           lng: this.finish.split(",")[1]
         }, { icon: this.icons });
-        this.map.addObjects([routeLine, startMarker, finishMarker]);
+        this.map.addObjects([routeLine, startMarker, medioMarker, prefinishMarker, finishMarker]);
         this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
       }
     }, error => {
