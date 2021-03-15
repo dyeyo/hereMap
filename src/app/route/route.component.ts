@@ -43,11 +43,7 @@ export class RouteComponent implements OnInit {
   group
   coordinate
   html
-  icon = new H.map.Icon('./../assets/img/marcadores-05.svg');
-  icon3 = '<svg  width="24" height="24" xmlns="http://www.w3.org/2000/svg">' +
-    '<rect stroke="black" fill="${FILL}" x="1" y="1" width="22" height="22" />' +
-    '<text x="12" y="18" font-size="12pt" font-family="Arial" font-weight="bold" ' +
-    'text-anchor="middle" fill="${STROKE}" >C</text></svg>';
+  icons = new H.map.Icon('./../assets/img/marcadores-05.svg');
   icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
   public constructor() {
     this.platform = new H.service.Platform({
@@ -69,7 +65,8 @@ export class RouteComponent implements OnInit {
       defaultLayers.vector.normal.map,
       {
         zoom: 15,
-        center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
+        // center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
+        center: { lat: "4.58728", lng: "-74.10724" },
         pixelRatio: window.devicePixelRatio || 1
       }
     );
@@ -80,7 +77,21 @@ export class RouteComponent implements OnInit {
   }
 
   public route(start: any, finish: any) {
-    let params = {
+    // let lineString = new H.geo.LineString();
+
+    // lineString.pushPoint({ lat: 4.58728, lng: -74.10724 });
+    // lineString.pushPoint({ lat: 4.6031, lng: -74.12812 });
+    // lineString.pushPoint({ lat: 1.21485, lng: -77.27776 });
+    // lineString.pushPoint({ lat: 1.166264, lng: -77.299513 });
+    // lineString.pushPoint({ lat: 10.96974, lng: -74.80494 });
+    // lineString.pushPoint({ lat: 4.61824, lng: -74.11027 });
+    // lineString.pushPoint({ lat: 4.58728, lng: -74.10724 });
+
+    // this.map.addObject(new H.map.Polyline(
+    //   lineString, { style: { lineWidth: 4 } }
+    // ));
+    let params =
+    {
       "mode": "fastest;car",
       "waypoint0": "geo!" + this.start,
       "waypoint1": "geo!" + this.finish,
@@ -98,16 +109,15 @@ export class RouteComponent implements OnInit {
         });
         let routeLine = new H.map.Polyline(lineString, {
           style: { strokeColor: "blue", lineWidth: 5 }
-        });
-
+        })
         let startMarker = new H.map.Marker({
           lat: this.start.split(",")[0],
           lng: this.start.split(",")[1]
-        });
+        }, { icon: this.icon2 });
         let finishMarker = new H.map.Marker({
           lat: this.finish.split(",")[0],
           lng: this.finish.split(",")[1]
-        }, { icon: this.icon2 });
+        }, { icon: this.icons });
         this.map.addObjects([routeLine, startMarker, finishMarker]);
         this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
       }
@@ -139,8 +149,11 @@ export class RouteComponent implements OnInit {
   }
 
   public addMarkerToGroup(group, coordinate, html) {
-
-    this.marker = new H.map.Marker(coordinate);
+    this.marker = new H.map.Marker({
+      lat: this.start.split(",")[0],
+      lng: this.start.split(",")[1]
+    }, { icon: this.icon2 });
+    // this.marker = new H.map.Marker(coordinate);
     this.marker.setData(html);
     this.group.addObject(this.marker);
   }
