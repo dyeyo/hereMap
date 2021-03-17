@@ -116,24 +116,23 @@ export class RouteComponent implements OnInit {
   }
 
   public ngOnInit() {
-    // this.map = new H.Map(
-    //   document.getElementById('mapContainer'),
-    //   this.defaultLayers.vector.normal.map,
-    //   {
-    //     zoom: 15,
-    //     center: { lat: 1.214405018383404, lng: -77.27922019835766 }
-    //   });
-    // window.addEventListener('resize', () => this.map.getViewPort().resize());
-    // let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
-    // this.ui = H.ui.UI.createDefault(this.map, this.defaultLayers);
-
-    // let icon = new H.map.Icon('./../assets/img/carritos-01.png'),
-    //   coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
-    //   marker = new H.map.Marker(coords, { icon })
-    // marker.addEventListener('tap', function (evt) {
-    //   alert('HOLA');
-    // });
-    // this.map.addObject(marker, marker);
+    this.map = new H.Map(
+      document.getElementById('mapContainer'),
+      this.defaultLayers.vector.normal.map,
+      {
+        zoom: 15,
+        center: { lat: 1.214405018383404, lng: -77.27922019835766 }
+      });
+    window.addEventListener('resize', () => this.map.getViewPort().resize());
+    let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    this.ui = H.ui.UI.createDefault(this.map, this.defaultLayers)
+    let icon = new H.map.Icon('./../assets/img/carritos-01.png'),
+      coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
+      marker = new H.map.Marker(coords, { icon })
+    marker.addEventListener('tap', function (evt) {
+      alert('HOLA');
+    });
+    this.map.addObject(marker, marker);
   }
 
   public ngAfterViewInit() {
