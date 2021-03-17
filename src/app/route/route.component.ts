@@ -1,3 +1,4 @@
+import { LocationService } from './../services/location.service';
 import { Component, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, Input } from '@angular/core';
 
 declare let H: any;
@@ -9,33 +10,27 @@ declare let H: any;
 export class RouteComponent implements OnInit {
 
   title = 'here-project';
-  private platform: any;
+  public platform = new H.service.Platform({
+    "apikey": "hwpesCIFlK4kf3OTS00AucCVEMuwSPZljuRvZtJVUdE"
+  });
 
   @ViewChild("map")
   public mapElement: ElementRef;
 
-  @Input()
   public appId: any;
 
-  @Input()
   public appCode: any;
 
-  @Input()
   public start: any;
 
-  @Input()
   public mitad: any;
 
-  @Input()
   public prefin: any;
 
-  @Input()
   public finish: any;
 
-  @Input()
   public width: any;
 
-  @Input()
   public height: any;
 
   public directions: any;
@@ -50,7 +45,7 @@ export class RouteComponent implements OnInit {
   coordinate
   html
   icons = new H.map.Icon('./../assets/img/marcadores-05.svg');
-  icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
+  iconCamion = new H.map.Icon('./../assets/img/carritos-01.png');
   waypoints = [
     {
       "id": "BOGOTAINICIO",
@@ -109,27 +104,37 @@ export class RouteComponent implements OnInit {
       "estimatedDeparture": null
     }
   ];
+  defaultLayers = this.platform.createDefaultLayers();
 
-  public constructor() {
+  public constructor(private locationService: LocationService) {
     this.platform = new H.service.Platform({
       "apikey": "hwpesCIFlK4kf3OTS00AucCVEMuwSPZljuRvZtJVUdE"
     });
 
-    this.waypoints.forEach(item => console.log(`${item.lat},${item.lng}`));
-    this.routingMode = 'fastest;car';
-    this.start = "1.2086258882443415,-77.28358656039275";
-    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
-    this.mitad = "1.217051,-77.283424";
-    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
-    this.prefin = "1.224967,-77.291535";
-    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
-    this.finish = "1.2068161609787038,-77.27432740193775";
-    // this.waypoints.forEach(item => `${item.lat},${item.lng}`);
     this.directions = [];
     this.router = this.platform.getRoutingService();
   }
 
-  public ngOnInit() { }
+  public ngOnInit() {
+    // this.map = new H.Map(
+    //   document.getElementById('mapContainer'),
+    //   this.defaultLayers.vector.normal.map,
+    //   {
+    //     zoom: 15,
+    //     center: { lat: 1.214405018383404, lng: -77.27922019835766 }
+    //   });
+    // window.addEventListener('resize', () => this.map.getViewPort().resize());
+    // let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    // this.ui = H.ui.UI.createDefault(this.map, this.defaultLayers);
+
+    // let icon = new H.map.Icon('./../assets/img/carritos-01.png'),
+    //   coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
+    //   marker = new H.map.Marker(coords, { icon })
+    // marker.addEventListener('tap', function (evt) {
+    //   alert('HOLA');
+    // });
+    // this.map.addObject(marker, marker);
+  }
 
   public ngAfterViewInit() {
     let defaultLayers = this.platform.createDefaultLayers();
@@ -138,28 +143,41 @@ export class RouteComponent implements OnInit {
       defaultLayers.vector.normal.map,
       {
         zoom: 15,
-        // center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
         center: { lat: "4.58728", lng: "-74.10724" },
         pixelRatio: window.devicePixelRatio || 1
       }
     );
     var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
+    let icon = new H.map.Icon('./../assets/img/marcadores-05.svg'),
+      coords = { lat: 1.2144085018383404, lng: -77.27922019835766 },
+      marker = new H.map.Marker(coords, { icon });
+    this.map.addObject(marker, marker);
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
     this.route(this.start, this.finish);
     this.addInfoBubble(this.map);
   }
 
+  // getUbicacion() {
+  //   this.locationService.getLocations().subscribe(res => {
+  //     console.log(res);
+  //     this.waypoints = res
+  //   })
+  // }
+
   public route(start: any, finish: any) {
-    let params =
-    {
+    const params = {
       "mode": "fastest;car",
-      "waypoint0": this.start,
-      "waypoint1": this.mitad,
-      "waypoint2": this.prefin,
-      "waypoint3": this.finish,
       "representation": "display"
     }
+    this.waypoints.forEach(({ lat, lng }, index) => {
+
+      params[`waypoint${index}`] = `${lat},${lng}`
+    });
+    // this.map.addEventListener('tap', function (evt) {
+    //   console.log('HOLA');
+    // });
     this.map.removeObjects(this.map.getObjects());
+
     this.router.calculateRoute(params, data => {
       if (data.response) {
         this.directions = data.response.route[0].leg[0].maneuver;
@@ -172,23 +190,14 @@ export class RouteComponent implements OnInit {
         let routeLine = new H.map.Polyline(lineString, {
           style: { strokeColor: "blue", lineWidth: 5 }
         })
-        let startMarker = new H.map.Marker({
-          lat: this.start.split(",")[0],
-          lng: this.start.split(",")[1]
-        }, { icon: this.icon2 });
-        let medioMarker = new H.map.Marker({
-          lat: this.mitad.split(",")[0],
-          lng: this.mitad.split(",")[1]
-        }, { icon: this.icon2 });
-        let prefinishMarker = new H.map.Marker({
-          lat: this.prefin.split(",")[0],
-          lng: this.prefin.split(",")[1]
-        }, { icon: this.icons });
-        let finishMarker = new H.map.Marker({
-          lat: this.finish.split(",")[0],
-          lng: this.finish.split(",")[1]
-        }, { icon: this.icons });
-        this.map.addObjects([routeLine, startMarker, medioMarker, prefinishMarker, finishMarker]);
+
+        const camiones = [];
+        this.waypoints.forEach(({ lat, lng }) => {
+          const camion = new H.map.Marker({ lat, lng }, { icon: this.iconCamion });
+          camiones.push(camion);
+        });
+
+        this.map.addObjects([routeLine, ...camiones]);
         this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
       }
     }, error => {
@@ -222,7 +231,7 @@ export class RouteComponent implements OnInit {
     this.marker = new H.map.Marker({
       lat: this.start.split(",")[0],
       lng: this.start.split(",")[1]
-    }, { icon: this.icon2 });
+    }, { icon: this.iconCamion });
     // this.marker = new H.map.Marker(coordinate);
     this.marker.setData(html);
     this.group.addObject(this.marker);

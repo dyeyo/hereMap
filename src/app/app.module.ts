@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { HereMapComponent } from './here-map/here-map.component';
 import { FormsModule } from '@angular/forms';
 import { RouteComponent } from './route/route.component';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -16,6 +17,7 @@ import { RouteComponent } from './route/route.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     FormsModule,
   ],
   providers: [],
