@@ -104,6 +104,7 @@ export class RouteComponent implements OnInit {
       "estimatedDeparture": null
     }
   ];
+
   defaultLayers = this.platform.createDefaultLayers();
 
   public constructor(private locationService: LocationService) {
