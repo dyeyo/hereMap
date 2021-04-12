@@ -63,10 +63,9 @@ export class HereMapComponent implements OnInit {
 
   public addMarkerToGroup(group, coordinate, html) {
     this.locationService.getLocations().subscribe((res: any) => {
-      console.log(res);
+      console.log(res.results[0].waypoints);
       this.waypoints = res.results[0].waypoints;
       const camiones = [];
-      // setInterval(() => {
       this.waypoints.forEach(({ lat, lng }) => {
         this.marker = new H.map.Marker(
           { lat, lng },
@@ -79,26 +78,25 @@ export class HereMapComponent implements OnInit {
       });
     })
 
-
-    const reqModel = new RequestModel();
-    reqModel.idusuario = 152;
-    reqModel.estado = 'R';
-    reqModel.Idempresa = 2;
-    this.locationService.obtenerVehiculosZona(reqModel).subscribe((res: any) => {
-      console.log(res);
-      this.waypoints = res;
-      const camiones = [];
-      this.waypoints.forEach(({ latiudVehiculo, longitudVehiculo }) => {
-        this.marker = new H.map.Marker(
-          { latiudVehiculo, longitudVehiculo },
-          { icon: this.iconCamion });
-        camiones.push(this.marker);
-        this.marker.setData(html);
-        this.group.addObject(this.marker);
-        this.map.addEventListener("tap", (e) => {
-        });
-      });
-    })
+    // const reqModel = new RequestModel();
+    // reqModel.idusuario = 152;
+    // reqModel.estado = 'R';
+    // reqModel.Idempresa = 2;
+    // this.locationService.obtenerVehiculosZona(reqModel).subscribe((res: any) => {
+    //   console.log(res);
+    //   this.waypoints = res;
+    //   const camiones = [];
+    //   this.waypoints.forEach(({ latiudVehiculo, longitudVehiculo }) => {
+    //     this.marker = new H.map.Marker(
+    //       { latiudVehiculo, longitudVehiculo },
+    //       { icon: this.iconCamion });
+    //     camiones.push(this.marker);
+    //     this.marker.setData(html);
+    //     this.group.addObject(this.marker);
+    //     this.map.addEventListener("tap", (e) => {
+    //     });
+    //   });
+    // })
   }
   addInfoBubble(map) {
     this.group = new H.map.Group();
