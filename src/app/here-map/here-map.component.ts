@@ -10,7 +10,7 @@ declare var H: any;
 export class HereMapComponent implements OnInit {
 
   platform = new H.service.Platform({
-    'apikey': '23h0D8Ct5g8L-fXopb1Nh8Qt6YcJgOMMnRK93VTzERY'
+    'apikey': 'YJkYaLYfjrJd0KcdECnSLhHaX86cnYTjOyUd9FqPAv4'
   });
   map: any
   targetElement = document.getElementById('mapContainer');
@@ -22,65 +22,65 @@ export class HereMapComponent implements OnInit {
   y;
   iconCamion = new H.map.Icon('./../assets/img/carritos-01.png');
   public start: any;
-  // waypoints = [
-  //   {
-  //     "id": "BOGOTAINICIO",
-  //     "lat": 4.58728,
-  //     "lng": -74.10724,
-  //     "sequence": 0,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   // {
-  //   //   "id": "Bogota2",
-  //   //   "lat": 4.6031,
-  //   //   "lng": -74.12812,
-  //   //   "sequence": 1,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // },
-  //   // {
-  //   //   "id": "PARQUENARIÑO",
-  //   //   "lat": 1.21485,
-  //   //   "lng": -77.27776,
-  //   //   "sequence": 2,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // },
-  //   // {
-  //   //   "id": "Catambuco",
-  //   //   "lat": 1.166264,
-  //   //   "lng": -77.299513,
-  //   //   "sequence": 3,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // },
-  //   // {
-  //   //   "id": "BARRANQUILLA",
-  //   //   "lat": 10.96974,
-  //   //   "lng": -74.80494,
-  //   //   "sequence": 4,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // },
-  //   // {
-  //   //   "id": "Bogota1",
-  //   //   "lat": 4.61824,
-  //   //   "lng": -74.11027,
-  //   //   "sequence": 5,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // },
-  //   // {
-  //   //   "id": "BOGOTAFIN",
-  //   //   "lat": 4.58728,
-  //   //   "lng": -74.10724,
-  //   //   "sequence": 6,
-  //   //   "estimatedArrival": null,
-  //   //   "estimatedDeparture": null
-  //   // }
-  // ];
-  waypoints = [];
+  waypoints = [
+    {
+      "id": "BOGOTAINICIO",
+      "lat": 4.58728,
+      "lng": -74.10724,
+      "sequence": 0,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Bogota2",
+      "lat": 4.6031,
+      "lng": -74.12812,
+      "sequence": 1,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "PARQUENARIÑO",
+      "lat": 1.21485,
+      "lng": -77.27776,
+      "sequence": 2,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Catambuco",
+      "lat": 1.166264,
+      "lng": -77.299513,
+      "sequence": 3,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "BARRANQUILLA",
+      "lat": 10.96974,
+      "lng": -74.80494,
+      "sequence": 4,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "Bogota1",
+      "lat": 4.61824,
+      "lng": -74.11027,
+      "sequence": 5,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    },
+    {
+      "id": "BOGOTAFIN",
+      "lat": 4.58728,
+      "lng": -74.10724,
+      "sequence": 6,
+      "estimatedArrival": null,
+      "estimatedDeparture": null
+    }
+  ];
+  // waypoints = [];
   constructor(private locationService: LocationService) { }
 
   ngOnInit(): void {
@@ -122,21 +122,21 @@ export class HereMapComponent implements OnInit {
       console.log(res.results[0].waypoints);
       this.waypoints = res.results[0].waypoints;
       const camiones = [];
-      setInterval(() => {
-        this.waypoints.forEach(({ lat, lng }) => {
-          console.log('CAMBIO METODO', lat, lng);
-          this.marker = new H.map.Marker(
-            { lat, lng },
-            { icon: this.iconCamion });
-          camiones.push(this.marker);
-          this.marker.setData(html);
-          this.group.addObject(this.marker);
+      // setInterval(() => {
+      this.waypoints.forEach(({ lat, lng }) => {
+        this.marker = new H.map.Marker(
+          { lat, lng },
+          { icon: this.iconCamion });
+        camiones.push(this.marker);
+        this.marker.setData(html);
+        this.group.addObject(this.marker);
+        this.map.addEventListener("tap", (e) => {
+          alert('asdsad')
         });
-      }, 3000);
+      });
+      // }, 3000);
     })
-
   }
-
   addInfoBubble(map) {
     this.group = new H.map.Group();
     map.addObject(this.group);
@@ -159,5 +159,4 @@ export class HereMapComponent implements OnInit {
       '</div>'
     );
   }
-
 }
