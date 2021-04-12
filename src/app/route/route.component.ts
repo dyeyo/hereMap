@@ -1,5 +1,7 @@
+import { RequestModel } from './../models/RequestModel';
 import { Component, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, Input } from '@angular/core';
 import { Router } from '@angular/router';
+import { LocationService } from '../services/location.service';
 
 declare let H: any;
 @Component({
@@ -53,7 +55,9 @@ export class RouteComponent implements OnInit {
   html
   icons = new H.map.Icon('./../assets/img/marcadores-05.svg');
   icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
-  public constructor(private routerActive: Router) {
+  waypoints
+
+  public constructor(private routerActive: Router, private locationService: LocationService) {
     this.platform = new H.service.Platform({
       "apikey": "YJkYaLYfjrJd0KcdECnSLhHaX86cnYTjOyUd9FqPAv4"
     });
@@ -76,7 +80,6 @@ export class RouteComponent implements OnInit {
       {
         zoom: 15,
         center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
-        // center: { lat: "4.58728", lng: "-74.10724" },
         pixelRatio: window.devicePixelRatio || 1
       }
     );
@@ -166,17 +169,36 @@ export class RouteComponent implements OnInit {
   }
 
   clearMap() {
-    alert('lala')
     this.routerActive.navigate(['ruta']);
   }
 
   addMarkersToMap() {
-    var parisMarker = new H.map.Marker({ lat: 1.2086258882443415, lng: -77.28358656039275 },
-      { icon: this.icon2 });
-    this.map.addObject(parisMarker);
-    this.map.addEventListener("tap", (e) => {
-      this.verRuta()
-    });
+    const reqModel = new RequestModel();
+    reqModel.idusuario = 152;
+    reqModel.estado = 'R';
+    reqModel.Idempresa = 2;
+    this.locationService.obtenerVehiculosZona(reqModel).subscribe(res => {
+      this.waypoints = res;
+      this.waypoints.forEach(({ latiudVehiculo, longitudVehiculo }) => {
+        const camiones = [];
+        this.marker = new H.map.Marker(
+          { latiudVehiculo, longitudVehiculo },
+          { icon: this.icon2 });
+        console.log(this.marker);
+        camiones.push(this.marker);
+        console.log(camiones);
+        this.group.addObject(this.marker);
+        this.map.addEventListener("tap", (e) => {
+          this.verRuta()
+        });
+      });
+    })
+    // var parisMarker = new H.map.Marker({ lat: 1.2086258882443415, lng: -77.28358656039275 },
+    //   { icon: this.icon2 });
+    // this.map.addObject(parisMarker);
+    // this.map.addEventListener("tap", (e) => {
+    //   this.verRuta()
+    // });
   }
 
   verRuta() {
