@@ -5,9 +5,9 @@ import { LocationService } from '../services/location.service';
 
 declare let H: any;
 
-function verRutas(log) {
-  alert(log)
-}
+// function verRutas(log) {
+//   alert(log)
+// }
 
 @Component({
   selector: 'app-route',
@@ -186,7 +186,7 @@ export class RouteComponent implements OnInit {
 
     let params: any;
 
-    if (this.listaVeiculosRuta[0].entregas.length > 1) {
+    if (this.listaVeiculosRuta[1].entregas.length > 1) {
 
       params =
       {
@@ -194,14 +194,14 @@ export class RouteComponent implements OnInit {
         "representation": "display"
       }
 
-      this.listaVeiculosRuta[0].entregas.forEach(({ latitudestino, longituddestino }, index) => {
+      this.listaVeiculosRuta[1].entregas.forEach(({ latitudestino, longituddestino }, index) => {
         const lat = latitudestino;
         const lng = longituddestino;
         params[`waypoint${index}`] = `${lat},${lng}`
       });
-    } else if (this.listaVeiculosRuta[0].entregas.length === 1) {
-      this.start = this.listaVeiculosRuta[0].latitudBodega + ',' + this.listaVeiculosRuta[1].longitudBodega;
-      this.finish = this.listaVeiculosRuta[0].entregas[0].latitudestino + ',' + this.listaVeiculosRuta[0].entregas[0].longituddestino;
+    } else if (this.listaVeiculosRuta[1].entregas.length === 1) {
+      this.start = this.listaVeiculosRuta[1].latitudBodega + ',' + this.listaVeiculosRuta[1].longitudBodega;
+      this.finish = this.listaVeiculosRuta[1].entregas[0].latitudestino + ',' + this.listaVeiculosRuta[1].entregas[0].longituddestino;
       params =
       {
         "mode": "fastest;car",
@@ -211,9 +211,9 @@ export class RouteComponent implements OnInit {
       }
     }
 
-    if (this.listaVeiculosRuta[0].entregas.length > 0) {
+    if (this.listaVeiculosRuta[1].entregas.length > 0) {
 
-      this.map.removeObjects(this.map.getObjects());
+      //this.map.removeObjects(this.map.getObjects());
       this.router.calculateRoute(params, data => {
         if (data.response) {
           this.directions = data.response.route[0].leg[0].maneuver;
@@ -228,7 +228,7 @@ export class RouteComponent implements OnInit {
           })
 
           const camiones = [];
-          this.listaVeiculosRuta[0].entregas.forEach(({ latitudestino, longituddestino }) => {
+          this.listaVeiculosRuta[1].entregas.forEach(({ latitudestino, longituddestino }) => {
             const lat = latitudestino;
             const lng = longituddestino;
             const camion = new H.map.Marker({ lat, lng }, { icon: this.icon3 });
@@ -329,9 +329,12 @@ export class RouteComponent implements OnInit {
         //var container = new H.map.Group();
         //container=[...objetosMarker]
         console.log('container:',container);
-        container.addEventListener('tap', function (evt) {
-          // Now lets log the event
-          this.verRuta(evt.target.getData());
+        // container.addEventListener('tap', function (evt) {
+        //   // Now lets log the event
+        //   verRutas(evt.target.getData());
+        // });
+        container.addEventListener('tap',event=>{
+          this.verRuta(event.target.getData());
         });
         this.group.addObject(container);
       })
@@ -364,7 +367,8 @@ export class RouteComponent implements OnInit {
   // }
 
   verRuta(e) {
-    console.log(e);
+    //debugger
+    alert(e);
     this.route(this.start, this.finish);
   }
 
@@ -406,6 +410,10 @@ export class RouteComponent implements OnInit {
       '</div>'
     );
   }
+
+  // verRutas(log) {
+  //   alert(log)
+  // }
 
 }
 
