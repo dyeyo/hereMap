@@ -14,7 +14,7 @@ export class LocationService {
 
   GetToken() {
     let login:any = {account: 'mitovar',password: 'Admin1980*',apikey: 'AAAA1bYTego:APA91bEvMz-bc0TroLp8W56q9uIJsuSvMzXlljBGLCqqr6em5q3Wk2eDdY6v79vR3D5rjHS8J-8fpGvUuDvjUssflfZ1wuNj-uSFdm8xAGN1BmIQpC_vXd5vXvCgIClS6YS4g3jYI6sTmtOVAR'}
-    return this.http.post<any>('https://appdev.gipicorg.com:8437/api/Security/SignIn', login);
+    return this.http.post<any>('https://appqa.gipicorg.com/identity/api/Security/SignIn', login);
   }
 
   obtenerVehiculosZona(request: any,token: string) {
@@ -24,7 +24,7 @@ export class LocationService {
         'Authorization': 'Bearer '+token
       })
     };
-    return this.http.post<any>('https://appdev.gipicorg.com:8438/api/Tracking/ObtenerVehiculosRuta', request, httpOptionsAuth);
+    return this.http.post<any>('https://appqa.gipicorg.com/tracking/api/Tracking/ObtenerVehiculosRuta', request, httpOptionsAuth);
   }
 
 }
