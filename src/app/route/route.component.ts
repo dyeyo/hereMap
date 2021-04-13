@@ -55,7 +55,9 @@ export class RouteComponent implements OnInit {
   html
   icons = new H.map.Icon('./../assets/img/marcadores-05.svg');
   icon2 = new H.map.Icon('./../assets/img/carritos-01.png');
-  waypoints
+  waypoints;
+  listaEntregas: any = [];
+  listaVeiculosRuta: any;
 
   public constructor(private routerActive: Router, private locationService: LocationService) {
     this.platform = new H.service.Platform({
@@ -135,7 +137,7 @@ export class RouteComponent implements OnInit {
   //   });
   // }
 
-  public route(start: any, finish: any) {
+  public routeOrig(start: any, finish: any) {
 
     const params = {
       "mode": "fastest;car",
@@ -174,6 +176,70 @@ export class RouteComponent implements OnInit {
     });
   }
 
+  public route(start: any, finish: any) {
+
+    let params: any;
+
+    if (this.listaVeiculosRuta[0].entregas.length > 1) {
+
+      params =
+      {
+        "mode": "fastest;car",
+        "representation": "display",
+        "waypoint0": "geo!" + this.start,
+        "waypoint1": "geo!" + this.finish,
+      }
+
+      this.listaVeiculosRuta[0].entregas.forEach(({ latitudestino, longituddestino }, index) => {
+        const lat = latitudestino;
+        const lng = longituddestino;
+        params[`waypoint${index}`] = `${lat},${lng}`
+      });
+    } else if (this.listaVeiculosRuta[0].entregas.length === 1) {
+      this.start = this.listaVeiculosRuta[0].latitudBodega + ',' + this.listaVeiculosRuta[1].longitudBodega;
+      this.finish = this.listaVeiculosRuta[0].entregas[0].latitudestino + ',' + this.listaVeiculosRuta[0].entregas[0].longituddestino;
+      params =
+      {
+        "mode": "fastest;car",
+        "representation": "display",
+        "waypoint0": "geo!" + this.start,
+        "waypoint1": "geo!" + this.finish,
+      }
+    }
+
+    if (this.listaVeiculosRuta[0].entregas.length > 0) {
+
+      this.map.removeObjects(this.map.getObjects());
+      this.router.calculateRoute(params, data => {
+        if (data.response) {
+          this.directions = data.response.route[0].leg[0].maneuver;
+          data = data.response.route[0];
+          let lineString = new H.geo.LineString();
+          data.shape.forEach(point => {
+            let parts = point.split(",");
+            lineString.pushLatLngAlt(parts[0], parts[1]);
+          });
+          let routeLine = new H.map.Polyline(lineString, {
+            style: { strokeColor: "blue", lineWidth: 5 }
+          })
+
+          const camiones = [];
+          this.listaVeiculosRuta[0].entregas.forEach(({ latitudestino, longituddestino }) => {
+            const lat = latitudestino;
+            const lng = longituddestino;
+            const camion = new H.map.Marker({ lat, lng }, { icon: this.icon2 });
+            camiones.push(camion);
+          });
+
+          this.map.addObjects([routeLine, ...camiones]);
+          this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
+        }
+      }, error => {
+        console.error(error);
+      });
+    }
+  }
+
   public addRouteShapeToMap(route) {
     route.sections.forEach((section) => {
       // decode LineString from the flexible polyline
@@ -197,21 +263,102 @@ export class RouteComponent implements OnInit {
   }
 
   public addMarkerToGroup(group, coordinate, html) {
-    this.locationService.getLocations().subscribe((res: any) => {
-      console.log(res.results[0].waypoints);
-      this.waypoints = res.results[0].waypoints;
-      const camiones = [];
-      this.waypoints.forEach(({ lat, lng }) => {
-        this.marker = new H.map.Marker(
-          { lat, lng },
-          { icon: this.icon2 });
-        camiones.push(this.marker);
-        this.marker.setData(html);
-        this.group.addObject(this.marker);
-        this.map.addEventListener("tap", (e) => {
+    // this.locationService.getLocations().subscribe((res: any) => {
+    //   console.log(res.results[0].waypoints);
+    //   console.log('this.waypoints pre',this.waypoints);
+    //   this.waypoints = res.results[0].waypoints;
+    //   const camiones = [];
+    //   debugger
+    //   this.waypoints.forEach(({ lat, lng }) => {
+    //     this.marker = new H.map.Marker(
+    //       { lat, lng },
+    //       { icon: this.icon2 });
+    //     camiones.push(this.marker);
+    //     this.marker.setData(html);
+    //     this.group.addObject(this.marker);
+    //     this.map.addEventListener("tap", (e) => {
+    //     });
+    //   });
+    //   console.log('this.waypoints post',this.waypoints);
+    // })
+  }
+
+  public addMarkerToGroupDos(group, coordinate, html) {
+
+    this.locationService.GetToken().subscribe(tk => {
+      const reqModel = new RequestModel();
+      reqModel.idusuario = 152;
+      reqModel.estado = 'R';
+      reqModel.Idempresa = 2;
+      this.locationService.obtenerVehiculosZona(reqModel, tk.token).subscribe(res => {
+        console.log(res);
+        console.log('this.waypoints pre', this.listaVeiculosRuta);
+        this.listaVeiculosRuta = res;
+        console.log('this.waypoints post', this.listaVeiculosRuta);
+        const camiones = [];
+        this.listaVeiculosRuta.forEach((ele) => {
+          //debugger
+          const lat = ele.latiudVehiculo;
+          const lng = ele.longitudVehiculo;
+          //this.listaEntregas.push(ele);
+
+          this.marker = new H.map.Marker(
+            { lat, lng },
+            { icon: this.icon2 });
+          camiones.push(this.marker);
+          this.marker.setData(html);
+          this.group.addObject(this.marker);
+          this.map.addEventListener("tap", (e) => {
+          });
+
         });
-      });
-    })
+      })
+
+    });
+
+  }
+
+  public addMarkerToGroupTres(group, coordinate, html) {
+
+    this.locationService.GetToken().subscribe(tk => {
+      const reqModel = new RequestModel();
+      reqModel.idusuario = 152;
+      reqModel.estado = 'R';
+      reqModel.Idempresa = 2;
+      console.log('this.waypoints pre2', this.waypoints);
+      this.locationService.obtenerVehiculosZona(reqModel, tk.token).subscribe(res => {
+        console.log('resApivehiculosRuta2', res);
+        this.waypoints = res;
+        console.log('this.waypoints post2', this.waypoints);
+        const camiones = [];
+        debugger
+        this.waypoints.forEach(({ latiudVehiculo, longitudVehiculo }) => {
+          const lat = latiudVehiculo;
+          const lng = longitudVehiculo;
+          if (longitudVehiculo === -74.11093000000001) {
+
+          }
+          else {
+            this.marker = new H.map.Marker(
+              { lat, lng },
+              { icon: this.icon2 });
+            console.log(this.marker);
+            camiones.push(this.marker);
+            console.log(camiones);
+            console.log('this.waypoints post', this.waypoints);
+            this.group.addObject(this.marker);
+          }
+        });
+      })
+
+
+    }, error => {
+
+    });
+
+  }
+  login(login: any) {
+    throw new Error('Method not implemented.');
   }
 
   clearMap() {
@@ -256,7 +403,19 @@ export class RouteComponent implements OnInit {
       this.ui.addBubble(bubble);
     }, false);
 
-    this.addMarkerToGroup(this.group, { lat: 1.2086258882443415, lng: -77.28358656039275 },
+    // this.addMarkerToGroup(this.group, { lat: 1.2086258882443415, lng: -77.28358656039275 },
+    //   '<div style="width: 12em;height: 9em;">' +
+    //   '<p style="margin-left: 30px;">7</p>' +
+    //   '<p style="font-size: 7px;margin-top: -20px;">entregas Completadas</p>' +
+    //   `<p style="margin-top: -3.5em;margin-left: 8.5em;">7</p>` +
+    //   '<p style="font-size: 7px;margin-top: -20px;margin-left: 13em;">entregas por hacer</p>' +
+    //   '<p style="margin-top: -10px;margin-left: 4em;">ASD798</p>' +
+    //   '<p style="margin-top: -10px;margin-left: 3em;s">Diego vallejo</p>' +
+    //   '<a (click)="alerta()" class="btn btnMap" style=" border-radius: 10px;margin-left: 16px;letter-spacing: 0px; color: #FFFFFF; opacity: 1; height: 2em; padding-top: 0.5em; margin-top: 9px; padding-bottom: 0.5em; text-align: center; padding-left: 2em; padding-right: 2em; background: transparent linear-gradient(89deg, #FC6100 0%, #FFB100 100%) 0% 0% no-repeat padding-box !important;">pedido en ruta</a>' +
+    //   '</div>'
+    // );
+
+    this.addMarkerToGroupDos(this.group, { lat: 1.2086258882443415, lng: -77.28358656039275 },
       '<div style="width: 12em;height: 9em;">' +
       '<p style="margin-left: 30px;">7</p>' +
       '<p style="font-size: 7px;margin-top: -20px;">entregas Completadas</p>' +
@@ -270,3 +429,4 @@ export class RouteComponent implements OnInit {
   }
 
 }
+
