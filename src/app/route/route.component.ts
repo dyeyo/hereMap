@@ -67,65 +67,8 @@ export class RouteComponent implements OnInit {
   idRuta
   entregaList
   waypoints = [];
-  // waypointsAlternative = [];
-  // waypoints = [
-  //   {
-  //     "id": "BOGOTAINICIO",
-  //     "lat": 4.58728,
-  //     "lng": -74.10724,
-  //     "sequence": 0,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "Bogota2",
-  //     "lat": 4.6031,
-  //     "lng": -74.12812,
-  //     "sequence": 1,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "PARQUENARIÑO",
-  //     "lat": 1.21485,
-  //     "lng": -77.27776,
-  //     "sequence": 2,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "Catambuco",
-  //     "lat": 1.166264,
-  //     "lng": -77.299513,
-  //     "sequence": 3,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "BARRANQUILLA",
-  //     "lat": 10.96974,
-  //     "lng": -74.80494,
-  //     "sequence": 4,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "Bogota1",
-  //     "lat": 4.61824,
-  //     "lng": -74.11027,
-  //     "sequence": 5,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   },
-  //   {
-  //     "id": "BOGOTAFIN",
-  //     "lat": 4.58728,
-  //     "lng": -74.10724,
-  //     "sequence": 6,
-  //     "estimatedArrival": null,
-  //     "estimatedDeparture": null
-  //   }
-  // ];
+  waypointsAlternative = [];
+  interval_time
 
   public constructor(private routerActive: Router, private locationService: LocationService) {
     this.platform = new H.service.Platform({
@@ -156,6 +99,10 @@ export class RouteComponent implements OnInit {
     var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
     this.ui = H.ui.UI.createDefault(this.map, defaultLayers);
     this.addInfoBubble(this.map);
+    this.interval_time = setInterval(() => {
+      this.addInfoBubble(this.map);
+    }, 1000);
+
   }
 
   public addRouteShapeToMap(route) {
@@ -179,7 +126,6 @@ export class RouteComponent implements OnInit {
   }
 
   public addMarkerToGroupDos(group, coordinate, html) {
-
     this.locationService.GetToken().subscribe(tk => {
       const reqModel = new RequestModel();
       reqModel.idusuario = 152;
@@ -187,7 +133,6 @@ export class RouteComponent implements OnInit {
       reqModel.Idempresa = 2;
       let objetosMarker: any = [];
       this.locationService.obtenerVehiculosZona(reqModel, tk.token).subscribe(res => {
-
         this.listaVeiculosRuta = res;
 
         const camiones = [];
@@ -214,22 +159,26 @@ export class RouteComponent implements OnInit {
 
         this.group.addObject(container);
       })
-
     });
 
   }
 
   verRuta(e) {
-
     this.listaVeiculosRuta = this.listaVeiculosRuta.find(r => r.idRuta === e);
-    //la alterna es entregas.posicianmieto
-    console.log(this.listaVeiculosRuta);
     // if (!this.listaVeiculosRuta) {
     //   alert("No hay entregas")
     // }
 
     this.waypoints.push(this.listaVeiculosRuta.entregas)
-    // this.waypointsAlternative.push(this.listaVeiculosRuta.entregas.posicionamiento)
+
+    // this.waypoints[0].forEach((item, index) => {
+
+    //   if (item.posicionamiento.length != 0) {
+    //     this.waypointsAlternative.push(item.posicionamiento[index])
+    //     this.waypointsAlternative.filter(el => el != undefined)
+    //   }
+    // });
+    // console.log('FINAL', this.waypointsAlternative);
     this.route(this.start, this.finish);
   }
 
@@ -240,11 +189,18 @@ export class RouteComponent implements OnInit {
       "representation": "display"
     }
 
+    // const paramsAlternative = {
+    //   "mode": "fastest;car",
+    //   "representation": "display"
+    // }
+
     this.waypoints[0].forEach(({ latitudestino, longituddestino }, index) => {
-
       params[`waypoint${index}`] = `${latitudestino},${longituddestino}`
-
     });
+
+    // this.waypointsAlternative.forEach(({ latitud, longitud }, index) => {
+    //   paramsAlternative[`waypoint${index}`] = `${latitud},${longitud}`
+    // });
 
     this.map.removeObjects(this.map.getObjects());
 
@@ -263,7 +219,7 @@ export class RouteComponent implements OnInit {
 
         const camiones = [];
         this.waypoints[0].forEach(({ latitudestino, longituddestino }) => {
-          const camion = new H.map.Marker({ lat: latitudestino, lng: longituddestino }, { icon: this.icon2 });
+          const camion = new H.map.Marker({ lat: latitudestino, lng: longituddestino }, { icon: this.icon3 });
           camiones.push(camion);
         });
 
@@ -273,6 +229,36 @@ export class RouteComponent implements OnInit {
     }, error => {
       console.error(error);
     });
+
+    //ALTERNATIVATE
+
+    /*this.router.calculateRoute(paramsAlternative, data => {
+      if (data.response) {
+        this.directions = data.response.route[0].leg[0].maneuver;
+        data = data.response.route[0];
+        let lineString = new H.geo.LineString();
+
+        data.shape.forEach(point => {
+          let parts = point.split(",");
+          lineString.pushLatLngAlt(parts[0], parts[1]);
+        });
+
+        let routeLine = new H.map.Polyline(lineString, {
+          style: { strokeColor: "blue", lineWidth: 5 }
+        })
+
+        const camiones = [];
+        this.waypointsAlternative.forEach(({ latitud, longitud }) => {
+          const camion = new H.map.Marker({ lat: latitud, lng: longitud }, { icon: this.icon3 });
+          camiones.push(camion);
+        });
+
+        this.map.addObjects([routeLine, ...camiones]);
+        this.map.getViewModel().setLookAtData({ bounds: routeLine.getBoundingBox() });
+      }
+    }, error => {
+      console.error(error);
+    });*/
   }
 
   addInfoBubble(map) {
@@ -280,6 +266,7 @@ export class RouteComponent implements OnInit {
     //   // alert('asdsa')
     //   this.verRuta()
     // });
+
     this.group = new H.map.Group();
     map.addObject(this.group);
     // this.group.addEventListener('tap', (evt) => {
