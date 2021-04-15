@@ -165,20 +165,16 @@ export class RouteComponent implements OnInit {
 
   verRuta(e) {
     this.listaVeiculosRuta = this.listaVeiculosRuta.find(r => r.idRuta === e);
-    // if (!this.listaVeiculosRuta) {
-    //   alert("No hay entregas")
-    // }
 
     this.waypoints.push(this.listaVeiculosRuta.entregas)
 
-    // this.waypoints[0].forEach((item, index) => {
-
-    //   if (item.posicionamiento.length != 0) {
-    //     this.waypointsAlternative.push(item.posicionamiento[index])
-    //     this.waypointsAlternative.filter(el => el != undefined)
-    //   }
-    // });
-    // console.log('FINAL', this.waypointsAlternative);
+    this.waypoints[0].forEach((item, index) => {
+      item.posicionamiento.forEach((entrega, index) => {
+        console.log(entrega);
+        this.waypointsAlternative.push(entrega)
+      })
+    })
+    console.log(this.waypointsAlternative);
     this.route(this.start, this.finish);
   }
 
@@ -189,22 +185,23 @@ export class RouteComponent implements OnInit {
       "representation": "display"
     }
 
-    // const paramsAlternative = {
-    //   "mode": "fastest;car",
-    //   "representation": "display"
-    // }
+    const paramsAlternative = {
+      "mode": "fastest;car",
+      "representation": "display"
+    }
 
     this.waypoints[0].forEach(({ latitudestino, longituddestino }, index) => {
       params[`waypoint${index}`] = `${latitudestino},${longituddestino}`
     });
 
-    // this.waypointsAlternative.forEach(({ latitud, longitud }, index) => {
-    //   paramsAlternative[`waypoint${index}`] = `${latitud},${longitud}`
-    // });
+    this.waypointsAlternative.forEach(({ latitud, longitud }, index) => {
+      paramsAlternative[`waypoint${index}`] = `${latitud},${longitud}`
+    });
 
     this.map.removeObjects(this.map.getObjects());
 
     this.router.calculateRoute(params, data => {
+
       if (data.response) {
         this.directions = data.response.route[0].leg[0].maneuver;
         data = data.response.route[0];
@@ -232,7 +229,7 @@ export class RouteComponent implements OnInit {
 
     //ALTERNATIVATE
 
-    /*this.router.calculateRoute(paramsAlternative, data => {
+    this.router.calculateRoute(paramsAlternative, data => {
       if (data.response) {
         this.directions = data.response.route[0].leg[0].maneuver;
         data = data.response.route[0];
@@ -244,7 +241,7 @@ export class RouteComponent implements OnInit {
         });
 
         let routeLine = new H.map.Polyline(lineString, {
-          style: { strokeColor: "blue", lineWidth: 5 }
+          style: { strokeColor: "green", lineWidth: 5 }
         })
 
         const camiones = [];
@@ -258,7 +255,7 @@ export class RouteComponent implements OnInit {
       }
     }, error => {
       console.error(error);
-    });*/
+    });
   }
 
   addInfoBubble(map) {

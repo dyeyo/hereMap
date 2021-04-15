@@ -36,3 +36,13 @@
 89deg
 , #FC6100 0%, #FFB100 100%) 0% 0% no-repeat padding-box !important;
 }
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+#mapa {
+  width:100%;
+  height: 100%;
+  margin:0 auto;
+}
