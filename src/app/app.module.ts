@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { RouteComponent } from './route/route.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { RutasVehiculoComponent } from './rutas-vehiculo/rutas-vehiculo.component';
+import { TitleCasePipe } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,7 @@ import { RutasVehiculoComponent } from './rutas-vehiculo/rutas-vehiculo.componen
     HttpClientModule,
     FormsModule,
   ],
-  providers: [],
+  providers: [TitleCasePipe],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
