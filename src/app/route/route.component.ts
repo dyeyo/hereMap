@@ -89,11 +89,13 @@ export class RouteComponent implements OnInit {
     let defaultLayers = this.platform.createDefaultLayers();
     this.map = new H.Map(
       this.mapElement.nativeElement,
-      defaultLayers.vector.normal.map,
+      //defaultLayers.vector.normal.map,
+      defaultLayers.raster.normal.map,
       {
-        zoom: 15,
+        zoom: 13,
         center: { lat: "1.2080690250186366", lng: "-77.2774602368257" },
-        pixelRatio: window.devicePixelRatio || 1
+        pixelRatio: window.devicePixelRatio || 1,
+        engineType: H.map.render.RenderEngine.EngineType.P2D
       }
     );
     var behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));

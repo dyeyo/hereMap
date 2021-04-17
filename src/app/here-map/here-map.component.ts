@@ -30,11 +30,14 @@ export class HereMapComponent implements OnInit {
   ngOnInit(): void {
     this.map = new H.Map(
       document.getElementById('mapContainer'),
-      this.defaultLayers.vector.normal.map,
+      //this.defaultLayers.vector.normal.map,
+      this.defaultLayers.raster.normal.map,
       {
-        zoom: 15,
+        zoom: 13,
         // center: { lat: 1.214405018383404, lng: -77.27922019835766 }
-        center: { lat: 4.58730, lng: -74.10725 }
+        center: { lat: 4.58730, lng: -74.10725 },
+        pixelRatio: window.devicePixelRatio || 1,
+        engineType: H.map.render.RenderEngine.EngineType.P2D
       });
     window.addEventListener('resize', () => this.map.getViewPort().resize());
     let behavior = new H.mapevents.Behavior(new H.mapevents.MapEvents(this.map));
